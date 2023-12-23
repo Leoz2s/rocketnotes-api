@@ -1,10 +1,12 @@
 const express = require("express"); // Import
 
-const app = express(); // Initialize
+// const usersRoutes = require("./routes/users.routes");
+const routes = require("./routes")
 
-app.get("/message", (request, response) => {
-  response.send("Hello World!");
-});
+const app = express(); // Initialize
+app.use(express.json());
+
+app.use(routes);
 
 const PORT = 3333; // Define Port
 app.listen(PORT, () => console.log(`Server is running on Port ${PORT}`)); // When the application starts, execute function
