@@ -1,4 +1,4 @@
-const {hash} = require("bcryptjs");
+const {hash, compare} = require("bcryptjs");
 const AppError = require("../utils/AppError");
 const sqliteConnection = require("../database/sqlite");
 
@@ -28,7 +28,7 @@ class UsersController {
   };
 
   async update(request, response) {
-    const {name, email, password} = request.body;
+    const {name, email, password, old_password} = request.body;
     const {id} = request.params;
 
     const database = await sqliteConnection();
@@ -46,16 +46,29 @@ class UsersController {
       throw new AppError("This e-mail is already your current e-mail.");
     };
 
-    user.name = name;
-    user.email = email;
+    user.name = name ?? user.name;
+    user.email = email ?? user.email;
+
+    if(password && !old_password){
+      throw new AppError("You need to inform the current password to change to a new one.");
+    }else if(password && old_password){
+      const checkOldPassword = await compare(old_password, user.password);
+
+      if(!checkOldPassword){
+        throw new AppError("The current password is incorrect.");
+      };
+
+      user.password = await hash(password, 8);
+    };
 
     await database.run(`
       UPDATE users SET 
       name = ?,
       email = ?,
-      updated_at = ?
+      password= ?,
+      updated_at = DATETIME('now')
       WHERE id = ?`,
-      [user.name, user.email, new Date(), user.id]
+      [user.name, user.email, user.password, user.id]
     );
 
     return response.status(200).json();
