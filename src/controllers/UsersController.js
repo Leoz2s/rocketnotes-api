@@ -10,7 +10,7 @@ class UsersController {
     const checkUserExists = await database.get("SELECT * FROM users WHERE email = (?)", [email]);
 
     if(checkUserExists){
-      throw new AppError("Este e-mail já está em uso.")
+      throw new AppError("This e-mail is already in use.")
     };
 
     const hashedPassword = await hash(password, 8);
@@ -32,7 +32,6 @@ class UsersController {
     // const {id} = request.params;
     const user_id = request.user.id;
 
-
     const database = await sqliteConnection();
     const user = await database.get("SELECT * FROM users WHERE id = (?)", [user_id]);
 
@@ -41,11 +40,8 @@ class UsersController {
     };
 
     const userWithUpdatedEmail = await database.get("SELECT * FROM users WHERE email = (?)", [email]);
-
     if(userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
-      throw new AppError("This e-mail is in use.");
-    }else if(userWithUpdatedEmail && userWithUpdatedEmail.id == user.id){
-      throw new AppError("This e-mail is already your current e-mail.");
+      throw new AppError("This e-mail is already in use.");
     };
 
     user.name = name ?? user.name;
