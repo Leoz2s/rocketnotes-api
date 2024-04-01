@@ -14,13 +14,15 @@ class UserCreateService {
     // const checkUserExists = await database.get("SELECT * FROM users WHERE email = (?)", [email]);
 
     if(checkUserExists){
-      throw new AppError("This e-mail is already in use.")
+      throw new AppError("This e-mail is already in use.");
     };
 
     const hashedPassword = await hash(password, 8);
 
-    await this.userRepository.create({name, email, password: hashedPassword});
+    const userCreated = await this.userRepository.create({name, email, password: hashedPassword});
     // await database.run("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", [name, email, hashedPassword]);
+
+    return userCreated;
   };
 };
 
